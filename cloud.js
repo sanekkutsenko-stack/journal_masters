@@ -33,7 +33,34 @@ function authTab(register) {
 authEl('tab-login').onclick = () => authTab(false);
 authEl('tab-register').onclick = () => authTab(true);
 
+let inviteToken = new URLSearchParams(location.hash.slice(1)).get('invite');
+if (inviteToken && /^[A-Za-z0-9_-]{24,180}$/.test(inviteToken)) {
+  sessionStorage.setItem('masters-invite-token',inviteToken);
+  sessionStorage.removeItem('masters-setting-password');
+  history.replaceState(null,'',location.pathname+location.search);
+} else { inviteToken=sessionStorage.getItem('masters-invite-token'); }
+authEl('join-invite').onsubmit = async event=>{
+  event.preventDefault();
+  const form=event.currentTarget,fields=form.elements,button=form.querySelector('button'),message=authEl('invite-message');
+  if(fields.password.value!==fields.repeat.value){message.textContent='Пароли должны совпадать.';return;}
+  button.disabled=true;
+  try{
+    if(!sessionStorage.getItem('masters-setting-password')){
+      const result=await journalCloud.auth.verifyOtp({type:'invite',token_hash:inviteToken});
+      if(result.error){sessionStorage.removeItem('masters-invite-token');inviteToken=null;message.textContent='Ссылка недействительна или истекла. Попросите у администратора новую ссылку.';return;}
+      sessionStorage.setItem('masters-setting-password',result.data.user.id);
+      sessionStorage.removeItem('masters-invite-token');inviteToken=null;
+    }
+    const {data}=await journalCloud.auth.getUser();
+    if(data.user?.id!==sessionStorage.getItem('masters-setting-password'))throw new Error('Сеанс приглашения завершён.');
+    const result=await journalCloud.auth.updateUser({password:fields.password.value});
+    if(result.error)throw result.error;
+    sessionStorage.removeItem('masters-setting-password');location.reload();
+  }catch{message.textContent='Не удалось установить пароль. Проверьте соединение и попробуйте снова.';}
+  finally{button.disabled=false;}
+};
 async function openStaffSession() {
+  if(inviteToken || sessionStorage.getItem("masters-setting-password")){authEl("load-title").textContent="Приглашение в журнал";authEl("load-description").textContent="Регистрация сотрудника";authEl("join-invite").hidden=false;return false;}
   const { data, error } = await journalCloud.auth.getSession();
   if (error) throw error;
   if (!data.session) {

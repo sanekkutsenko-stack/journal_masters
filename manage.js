@@ -1,6 +1,6 @@
 'use strict';
 const adminEl = id => document.getElementById(id);
-const actionNames = {registration:'Регистрация',access:'Изменение доступа',mark:'Отметка',legacy:'До переноса',add:'Добавление ученика',archive:'Архивирование',restore:'Восстановление'};
+const actionNames = {registration:'Регистрация',access:'Изменение доступа',mark:'Отметка',legacy:'До переноса',invite:'Приглашение',add:'Добавление ученика',archive:'Архивирование',restore:'Восстановление'};
 let activePanel = 'roster', studentsForGroup = [], historyCursor = null, viewTicket = 0;
 const rosterState = {version:-1,rows:[],originals:new Map(),ticket:0};
 
@@ -125,3 +125,20 @@ adminEl('roster-filter').oninput=adminEl('roster-mode').onchange=renderStudents;
 adminEl('student-add').onsubmit=event=>{event.preventDefault();const form=event.currentTarget;perform(form.querySelector('button'),async()=>{await editRoster(groupValue(),form.elements.name.value,'add');form.reset();});};
 adminEl('history-filter').onsubmit=event=>{event.preventDefault();loadHistory().catch(e=>note(e.message));};
 adminEl('history-next').onclick=event=>perform(event.currentTarget,()=>loadHistory(true));
+
+adminEl('issue-invite').onsubmit=event=>{
+  event.preventDefault();const form=event.currentTarget;
+  adminEl('issued-invite').hidden=true;adminEl('invite-url').value='';
+  perform(form.querySelector('button'),async()=>{
+    const email=form.elements.email.value.trim();
+    const {data,error}=await journalCloud.functions.invoke('masters-invite',{body:{email}});
+    if(error){let detail;try{detail=(await error.context.json()).error;}catch{}throw new Error(detail||'Не удалось создать ссылку. Попробуйте снова.');}
+    adminEl('invite-url').value=data.link;adminEl('issued-invite').hidden=false;
+    note('Ссылка создана для '+email+'. Передайте её лично сотруднику. После первого входа одобрите заявку.');
+  });
+};
+adminEl('invite-copy').onclick=()=>perform(adminEl('invite-copy'),async()=>{
+  const input=adminEl('invite-url');input.select();
+  try{await navigator.clipboard.writeText(input.value);note('Ссылка скопирована.');}catch{note('Ссылка выделена. Скопируйте её вручную.');}
+});
+adminEl('admin-panel').addEventListener('close',()=>{adminEl('invite-url').value='';adminEl('issued-invite').hidden=true;});
