@@ -27,11 +27,12 @@ function lessonDone(sheet,j){
 }
 function markValue(sheet,student,j){
   const entry=raw(sheet,column(j+2)+student.row);
-  if(entry.formula){
+  if(entry.formula || (student.added && !entry.manual)){
     if(!lessonDone(sheet,j))return '';
     if(sheet.kind==='primarySubject'&&student.dailyRow){
       const parent=app.journals.find(s=>s.id===sheet.dailyId);
-      const daily=markValue(parent,parent.students.find(p=>p.row===student.dailyRow),j);
+      const dailyStudent=parent?.students.find(p=>p.row===student.dailyRow);
+      const daily=dailyStudent?markValue(parent,dailyStudent,j):'';
       return daily&&daily!=='см. урок'?daily:'П';
     }
     return 'П';
@@ -69,7 +70,8 @@ function patch(sheet,ref,value){
 async function flushChanges(){
   if(sync.sending||!sync.ready||!sync.queue.length)return;
   sync.sending=true;
-  const operations=sync.queue.slice(0,100);
+  const operations=sync.queue.filter(op=>!archivedOperation(op)).slice(0,100);
+  if(!operations.length){sync.sending=false;syncStatus('Есть правки для архивного ученика');return;}
   try{
     const result=await callJournal('attendance_save', {operations});
     const accepted=new Set(result.accepted);
@@ -81,21 +83,22 @@ async function flushChanges(){
     $('#save-detail').textContent=error.message;
   }finally{
     sync.sending=false;
-    if(sync.queue.length){clearTimeout(sync.timer);sync.timer=setTimeout(flushChanges,2000);}
+    if(sync.queue.some(op=>!archivedOperation(op))){clearTimeout(sync.timer);sync.timer=setTimeout(flushChanges,2000);}
   }
 }
 async function pollChanges(){
   if(sync.polling||!sync.ready)return;
   sync.polling=true;
   try{
-    const result=await callJournal('attendance_changes', {since_id:sync.revision});
+    const [result,rosterChanged]=await Promise.all([callJournal('attendance_changes', {since_id:sync.revision}),refreshRoster()]);
     const pending=new Set(sync.queue.map(operation=>operation.key));
     for(const event of result.events){
       if(pending.has(event.cell_key))continue;
       if(event.is_deleted)delete app.patches[event.cell_key];else app.patches[event.cell_key]=event.cell_value;
     }
     sync.revision=result.revision;
-    if(result.events.length)render();
+    if(result.events.length||rosterChanged)render();
+    if(rosterChanged && adminEl('admin-panel').open && activePanel==='roster')loadRosterPanel().catch(e=>note(e.message));
     if(!sync.queue.length)syncStatus();
   }catch(error){if(!sync.queue.length)syncStatus('Соединение прервано');}
   finally{sync.polling=false;}
@@ -261,6 +264,43 @@ function writeValue(doc,ref,value){
   cell.removeAttribute('t');
   if(value!==null&&value!==''){cell.setAttribute('t','inlineStr');const inline=doc.createElementNS(NS,'is'),text=doc.createElementNS(NS,'t');text.textContent=value;inline.appendChild(text);cell.appendChild(inline);}
 }
+function prepareRosterExport(grouped){
+  const sheets=new Map(app.journals.map(sheet=>[sheet.id,sheet]));
+  for(const item of rosterState.rows){
+    if(!grouped[item.sheet])grouped[item.sheet]={};
+    if(!item.added)continue;
+    const sheet=sheets.get(item.sheet), edits=grouped[item.sheet], student=sheet.students.find(s=>s.row===item.row);
+    edits['A'+item.row]=item.name;
+    if(!student)continue;
+    for(let i=0;i<sheet.dates.length;i++){
+      const ref=column(i+2)+item.row;
+      if(!Object.hasOwn(edits,ref))edits[ref]=markValue(sheet,student,i);
+    }
+  }
+}
+function applyExcelRoster(doc,sheetName){
+  const rows=rosterState.rows.filter(row=>row.sheet===sheetName);
+  if(!rows.length)return;
+  const byRow=new Map(all(first(doc,'sheetData'),'row').map(r=>[Number(r.getAttribute('r')),r]));
+  let last=0;
+  for(const item of rows){
+    const node=byRow.get(item.row);
+    if(node&&!item.active)node.setAttribute('hidden','1');
+    if(item.added)last=Math.max(last,item.row);
+  }
+  if(last){
+    for(const tag of ['dimension','autoFilter']){
+      const el=first(doc,tag),ref=el?.getAttribute('ref'), m=ref?.match(/^([A-Z]+\d+):([A-Z]+)(\d+)$/);
+      if(m&&Number(m[3])<last)el.setAttribute('ref',m[1]+':'+m[2]+last);
+    }
+  }
+}
+function archivedOperation(op){
+  if(!rosterState.rows.length)return false;
+  const i=op.key.lastIndexOf('!'),sheet=op.key.slice(0,i),row=Number(op.key.slice(i+1).match(/\d+$/)?.[0]);
+  return rosterState.rows.some(item=>!item.active&&item.sheet===sheet&&item.row===row);
+}
+
 async function exportWorkbook(){
   const button=$('#export-btn');button.disabled=true;button.textContent='Готовим Excel…';
   try{
@@ -273,6 +313,7 @@ async function exportWorkbook(){
       const split=key.lastIndexOf('!'),sheet=key.slice(0,split),ref=key.slice(split+1);
       (grouped[sheet]??={})[ref]=value;
     }
+    prepareRosterExport(grouped);
     for(const [name,changes] of Object.entries(grouped)){
       const path=meta.mapping[name]?.path;if(!path)throw new Error('Лист отсутствует в исходном Excel');
       const doc=parseXML(await zip.file(path).async('string'));
@@ -289,6 +330,7 @@ async function exportWorkbook(){
         f.textContent=formula;f.removeAttribute('t');f.removeAttribute('si');f.removeAttribute('ref');
       }
       for(const [ref,value] of Object.entries(changes))writeValue(doc,ref,value);
+      applyExcelRoster(doc,name);
       zip.file(path,new XMLSerializer().serializeToString(doc));
     }
     let calc=first(meta.book,'calcPr');
@@ -361,6 +403,7 @@ async function start(){
     const state = { ...await (await loadAsset('journal')).json(), ...snapshot };
     app.journals=state.journals;app.patches=state.patches;app.fingerprint=state.fingerprint;
     app.importInfo=state.importInfo;
+    await refreshRoster();
     if(app.importInfo?.total){
       $('#import-summary').hidden=false;
       $('#import-summary').textContent='Сверено с Excel · '+app.importInfo.sourceName+' · '+app.importInfo.attendance+' отметок учеников и '+app.importInfo.lessons+' подтверждений и записей расписания.';
