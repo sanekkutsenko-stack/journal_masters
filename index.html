@@ -23,6 +23,7 @@
 <script src="stats.js" defer></script>
 <script src="curators.js" defer></script>
 <script src="tour.js" defer></script>
+<script src="import.js" defer></script>
 <script src="manage.js" defer></script>
 <script src="app.js" defer></script>
 </head>
@@ -290,7 +291,7 @@
 <dialog id="admin-panel" class="sheet wide-sheet" aria-labelledby="admin-title">
   <header class="sheet-head"><h3 id="admin-title">Управление журналом</h3><button type="button" class="icon-btn" id="admin-close" aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></header>
   <div class="segmented" role="group" aria-label="Разделы управления">
-    <button data-panel="roster" aria-pressed="true">Ученики</button><button data-panel="accounts" aria-pressed="false">Сотрудники</button><button data-panel="audit" aria-pressed="false">История</button>
+    <button data-panel="roster" aria-pressed="true">Ученики</button><button data-panel="accounts" aria-pressed="false">Сотрудники</button><button data-panel="audit" aria-pressed="false">История</button><button data-panel="import" aria-pressed="false">Книга Excel</button>
   </div>
   <p id="admin-message" class="form-message" role="status" aria-live="polite"></p>
   <section data-view="roster">
@@ -315,6 +316,7 @@
     <div id="manage-history" class="manage-list"></div>
     <button type="button" id="history-next" class="btn" hidden>Показать ещё</button>
   </section>
+  <section data-view="import" hidden><div id="import-panel"></div></section>
 </dialog>
 
 <div id="toast" role="status" aria-live="polite"></div>

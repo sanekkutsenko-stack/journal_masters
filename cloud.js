@@ -1,9 +1,14 @@
 'use strict';
 /* Связь с сервером (Supabase): вход, регистрация, приглашения, вызовы RPC. */
 
+// Адрес проекта Supabase и публичный ключ (он предназначен для браузера; секретный ключ сюда не кладут).
+const SUPABASE_URL = 'https://cygnwunhnmfyoymioufw.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_b2WJq31DatUCwKFnn-WKew_bLGwkmtX';
+const INVITES_ENABLED = false; // приглашения по ссылке требуют отдельной серверной функции
+
 const journalCloud = DEMO_MODE ? null : supabase.createClient(
-  'https://wyckiwszpyvqdgfndshx.supabase.co',
-  'sb_publishable_v37PxTCAGa-f0I3kFshCFw_dQQry0am',
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
   { auth: { storage: sessionStorage, storageKey: 'masters-journal-auth' } },
 );
 let staffId = null;
@@ -18,12 +23,14 @@ async function callJournal(procedure, args = {}) {
   return data;
 }
 
+/** Файлы журнала из закрытого хранилища: собранный журнал (journal) и исходная книга (workbook). */
 async function loadAsset(name) {
   if (DEMO_MODE) return demoBackend.asset(name);
-  const encoded = await callJournal('attendance_asset', { asset_name: name });
-  const bytes = Uint8Array.from(atob(encoded), character => character.charCodeAt(0));
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-  return new Response(stream);
+  const path = name === 'journal' ? 'journal.json.gz' : 'workbook.xlsx';
+  const { data, error } = await journalCloud.storage.from('journal').download(path);
+  if (error) throw new Error(name === 'journal' ? 'Не удалось загрузить журнал из хранилища.' : 'Не удалось загрузить исходную книгу Excel.');
+  if (name === 'journal') return new Response(data.stream().pipeThrough(new DecompressionStream('gzip')));
+  return new Response(data);
 }
 
 const authEl = id => document.getElementById(id);

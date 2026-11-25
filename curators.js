@@ -6,7 +6,7 @@
  * он с родителями, каким способом и о чём договорились.
  *
  * Сервер: функции curator_cases_list / curator_cases_add / curator_case_update
- * (см. supabase/curator_cases.sql). Пока их нет, список виден, но не сохраняется.
+ * (см. supabase/schema.sql). Пока их нет, список виден, но не сохраняется.
  */
 
 const CURATOR_RULES = { rate: 75, minLessons: 3, np: 3, notes: 3, weeksBack: 1 };
@@ -135,7 +135,7 @@ function renderCurators() {
         <button class="btn" data-cweek="${weekIndex - 1}" ${weekIndex <= 0 ? 'disabled' : ''}>Следующая<svg><use href="#i-right"/></svg></button>
       </div>
     </div>
-    ${curators.serverMissing ? `<div class="notice"><svg><use href="#i-alert"/></svg><div><strong>Список рассчитан, но пока не сохраняется.</strong><span>Чтобы отметки кураторов сохранялись и были видны всем, администратору нужно один раз выполнить файл <b>supabase/curator_cases.sql</b> в Supabase.</span></div></div>` : ''}
+    ${curators.serverMissing ? `<div class="notice"><svg><use href="#i-alert"/></svg><div><strong>Список рассчитан, но пока не сохраняется.</strong><span>Чтобы отметки кураторов сохранялись и были видны всем, администратору нужно один раз выполнить файл <b>supabase/schema.sql</b> в Supabase.</span></div></div>` : ''}
     <div class="filter-row">
       <div class="segmented" role="group" aria-label="Статус">${filters.map(([k, label]) => `<button data-cstatus="${k}" aria-pressed="${curators.status === k}">${label} <span class="count">${counts[k]}</span></button>`).join('')}</div>
       <label class="field inline">Класс<select id="curator-group"><option value="">Все классы и группы</option>${groups.map(g => `<option ${g === curators.group ? 'selected' : ''}>${escapeHTML(g)}</option>`).join('')}</select></label>

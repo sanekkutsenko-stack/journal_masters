@@ -481,6 +481,15 @@ dialog.side-sheet[open] { animation: slide .26s cubic-bezier(.2, .8, .2, 1); }
 @media (prefers-reduced-motion: reduce) { .tour-pointer { animation: none; } }
 body.tour-on { overflow: hidden; }
 
+/* Загрузка книги */
+.import-form { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.file-drop { position: relative; display: flex; align-items: center; justify-content: center; min-height: 72px; padding: 12px; border-radius: 16px; border: 2px dashed var(--line); background: var(--surface-2); font-weight: 600; color: var(--accent-text); text-align: center; cursor: pointer; }
+.file-drop:hover { border-color: var(--accent); }
+.file-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text); }
+.check input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--accent); }
+.import-form .form-message { color: var(--accent-text); }
+
 /* Управление */
 .control-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin: 12px 0; }
 .control-row .field { flex: 1 1 200px; }

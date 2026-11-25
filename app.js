@@ -5,6 +5,7 @@ async function start() {
   try {
     if (!await openStaffSession()) return;
     const snapshot = await callJournal('attendance_state');
+    if (!DEMO_MODE && !snapshot.fingerprint) { showEmptyJournal(); return; }
     const state = { ...await (await loadAsset('journal')).json(), ...snapshot };
     app.journals = state.journals;
     app.patches = state.patches;

@@ -162,6 +162,7 @@ async function showPanel(name) {
   $$('[data-panel]').forEach(el => el.setAttribute('aria-pressed', String(el.dataset.panel === name)));
   if (name === 'roster') await loadRosterPanel();
   else if (name === 'accounts') await loadAccounts();
+  else if (name === 'import') { const box = adminEl('import-panel'); box.innerHTML = importPanelHTML(false); bindImportForm(box); }
   else await loadHistory();
 }
 
@@ -206,4 +207,5 @@ adminEl('invite-copy').onclick = () => perform(adminEl('invite-copy'), async () 
   input.select();
   try { await navigator.clipboard.writeText(input.value); note('Ссылка скопирована.'); } catch { note('Ссылка выделена. Скопируйте её вручную.'); }
 });
+if (!INVITES_ENABLED && !DEMO_MODE) adminEl('issue-invite').hidden = true;
 adminEl('admin-panel').addEventListener('close', () => { adminEl('invite-url').value = ''; adminEl('issued-invite').hidden = true; });
