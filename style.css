@@ -190,7 +190,8 @@ body:not(.is-loaded) .sidebar, body:not(.is-loaded) .mobile-brand { display: non
 .welcome > p { margin: 0; }
 .auth-form { width: 100%; margin-top: 12px; padding: 24px; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; display: flex; flex-direction: column; gap: 14px; }
 .auth-form form { display: flex; flex-direction: column; gap: 14px; }
-.auth-form .segmented { display: flex; } .auth-form .segmented button { flex: 1; }
+.auth-form .segmented { display: flex; }
+#forgot-password { align-self: center; } .auth-form .segmented button { flex: 1; }
 .auth-form label, .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
 input:not([type="checkbox"]), select, textarea {
   min-height: 46px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line);

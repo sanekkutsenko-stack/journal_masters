@@ -131,6 +131,7 @@ async function loadAccounts() {
       };
       controls.append(role, actionButton(profile.status === 'active' ? 'Сохранить роль' : 'Открыть доступ', () => update('active'), 'btn btn-primary'));
       if (profile.status !== 'blocked') controls.append(actionButton('Закрыть доступ', () => update('blocked')));
+      if (INVITES_ENABLED && profile.status !== 'pending') controls.append(actionButton('Ссылка для смены пароля', () => issueLink(profile.email, 'recovery')));
       row.append(controls);
     }
     list.append(row);
@@ -183,6 +184,24 @@ adminEl('student-add').onsubmit = event => {
 adminEl('history-filter').onsubmit = event => { event.preventDefault(); loadHistory().catch(e => note(e.message)); };
 adminEl('history-next').onclick = event => perform(event.currentTarget, () => loadHistory(true));
 
+/** Ссылка-приглашение или ссылка для смены пароля (без писем: передаётся лично). */
+async function issueLink(email, type) {
+  if (DEMO_MODE) throw new Error('В демо-режиме ссылки не создаются.');
+  const { data, error } = await journalCloud.functions.invoke('masters-invite', { body: { email, type } });
+  if (error) {
+    let detail;
+    try { detail = (await error.context.json()).error; } catch {}
+    throw new Error(detail || 'Не удалось создать ссылку. Попробуйте снова.');
+  }
+  adminEl('invite-url').value = data.link;
+  adminEl('invite-url-label').textContent = (type === 'invite' ? 'Приглашение для ' : 'Смена пароля для ') + email + ' — передайте ссылку лично';
+  adminEl('issued-invite').hidden = false;
+  adminEl('issued-invite').scrollIntoView({ block: 'nearest' });
+  note(type === 'invite'
+    ? 'Приглашение создано. Сотрудник откроет ссылку, придумает пароль — и доступ откроется сразу.'
+    : 'Ссылка создана. Сотрудник откроет её и придумает новый пароль. Ссылка одноразовая.');
+}
+
 adminEl('issue-invite').onsubmit = event => {
   event.preventDefault();
   const form = event.currentTarget;
@@ -191,15 +210,9 @@ adminEl('issue-invite').onsubmit = event => {
   perform(form.querySelector('button'), async () => {
     if (DEMO_MODE) throw new Error('В демо-режиме приглашения не отправляются.');
     const email = form.elements.email.value.trim();
-    const { data, error } = await journalCloud.functions.invoke('masters-invite', { body: { email } });
-    if (error) {
-      let detail;
-      try { detail = (await error.context.json()).error; } catch {}
-      throw new Error(detail || 'Не удалось создать ссылку. Попробуйте снова.');
-    }
-    adminEl('invite-url').value = data.link;
-    adminEl('issued-invite').hidden = false;
-    note('Ссылка создана для ' + email + '. Передайте её лично сотруднику. После первого входа одобрите заявку.');
+    await issueLink(email, 'invite');
+    form.reset();
+    await loadAccounts();
   });
 };
 adminEl('invite-copy').onclick = () => perform(adminEl('invite-copy'), async () => {

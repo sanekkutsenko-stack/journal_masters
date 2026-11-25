@@ -438,3 +438,9 @@ create policy "journal delete for admins" on storage.objects for delete to authe
 
 -- Хранилищу нужно вызывать проверки доступа.
 grant execute on function public.is_active_staff(), public.is_admin() to authenticated;
+
+-- Серверная роль (используется только функцией «masters-invite» на стороне Supabase,
+-- в браузер не попадает): права на таблицы журнала.
+grant usage on schema public to service_role;
+grant select, insert, update, delete on all tables in schema public to service_role;
+grant usage, select on all sequences in schema public to service_role;

@@ -120,6 +120,7 @@
           <label>Рабочая почта<input type="email" name="email" autocomplete="username" required></label>
           <label>Пароль<input type="password" name="password" autocomplete="current-password" required></label>
           <button class="btn btn-primary btn-wide" type="submit">Войти</button>
+          <button type="button" class="text-btn" id="forgot-password">Забыли пароль?</button>
         </form>
         <form id="staff-register" hidden>
           <label>Рабочая почта<input type="email" name="email" autocomplete="email" required></label>
@@ -303,8 +304,8 @@
   </section>
   <section data-view="accounts" hidden>
     <p class="muted small">Одобрите заявку и назначьте роль. Закрытие доступа отключает работу с данными журнала.</p>
-    <form id="issue-invite" class="control-row"><label class="field">Пригласить сотрудника по почте<input name="email" type="email" required placeholder="name@example.ru"></label><button class="btn">Создать ссылку</button></form>
-    <div id="issued-invite" class="control-row" hidden><label class="field">Передайте ссылку лично этому сотруднику<input id="invite-url" type="text" readonly></label><button type="button" id="invite-copy" class="btn">Скопировать</button></div>
+    <form id="issue-invite" class="control-row"><label class="field">Пригласить сотрудника по почте<input name="email" type="email" required placeholder="name@example.ru"></label><button class="btn">Создать приглашение</button></form>
+    <div id="issued-invite" class="control-row" hidden><label class="field"><span id="invite-url-label">Передайте ссылку лично этому сотруднику</span><input id="invite-url" type="text" readonly></label><button type="button" id="invite-copy" class="btn">Скопировать</button></div>
     <div id="manage-accounts" class="manage-list"></div>
   </section>
   <section data-view="audit" hidden>

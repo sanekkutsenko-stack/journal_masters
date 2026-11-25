@@ -4,7 +4,7 @@
 // Адрес проекта Supabase и публичный ключ (он предназначен для браузера; секретный ключ сюда не кладут).
 const SUPABASE_URL = 'https://cygnwunhnmfyoymioufw.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_b2WJq31DatUCwKFnn-WKew_bLGwkmtX';
-const INVITES_ENABLED = false; // приглашения по ссылке требуют отдельной серверной функции
+const INVITES_ENABLED = true; // ссылки создаёт функция Supabase «masters-invite»
 
 const journalCloud = DEMO_MODE ? null : supabase.createClient(
   SUPABASE_URL,
@@ -47,16 +47,23 @@ function authTab(register) {
   authEl('auth-message').textContent = '';
 }
 authEl('tab-login').onclick = () => authTab(false);
+authEl('forgot-password').onclick = () => {
+  authEl('auth-message').textContent = 'Напишите администратору журнала: он создаст для вас ссылку для смены пароля (Управление → Сотрудники).';
+};
 authEl('tab-register').onclick = () => authTab(true);
 
-/* ---------- Приглашение по ссылке ---------- */
-let inviteToken = new URLSearchParams(location.hash.slice(1)).get('invite');
+/* ---------- Ссылки от администратора: приглашение (#invite=) и смена пароля (#reset=) ---------- */
+const linkParams = new URLSearchParams(location.hash.slice(1));
+let inviteToken = linkParams.get('invite') || linkParams.get('reset');
+let inviteType = linkParams.get('reset') ? 'recovery' : 'invite';
 if (inviteToken && /^[A-Za-z0-9_-]{24,180}$/.test(inviteToken)) {
   sessionStorage.setItem('masters-invite-token', inviteToken);
+  sessionStorage.setItem('masters-invite-type', inviteType);
   sessionStorage.removeItem('masters-setting-password');
   history.replaceState(null, '', location.pathname + location.search);
 } else {
   inviteToken = sessionStorage.getItem('masters-invite-token');
+  inviteType = sessionStorage.getItem('masters-invite-type') || 'invite';
 }
 
 authEl('join-invite').onsubmit = async event => {
@@ -66,10 +73,10 @@ authEl('join-invite').onsubmit = async event => {
   button.disabled = true;
   try {
     if (!sessionStorage.getItem('masters-setting-password')) {
-      const result = await journalCloud.auth.verifyOtp({ type: 'invite', token_hash: inviteToken });
+      const result = await journalCloud.auth.verifyOtp({ type: inviteType, token_hash: inviteToken });
       if (result.error) {
         sessionStorage.removeItem('masters-invite-token'); inviteToken = null;
-        message.textContent = 'Ссылка недействительна или истекла. Попросите у администратора новую ссылку.';
+        message.textContent = 'Ссылка недействительна, уже использована или истекла. Попросите у администратора новую ссылку.';
         return;
       }
       sessionStorage.setItem('masters-setting-password', result.data.user.id);
@@ -80,6 +87,7 @@ authEl('join-invite').onsubmit = async event => {
     const result = await journalCloud.auth.updateUser({ password: fields.password.value });
     if (result.error) throw result.error;
     sessionStorage.removeItem('masters-setting-password');
+    sessionStorage.removeItem('masters-invite-type');
     location.reload();
   } catch {
     message.textContent = 'Не удалось установить пароль. Проверьте соединение и попробуйте снова.';
@@ -104,8 +112,11 @@ async function openStaffSession() {
     return true;
   }
   if (inviteToken || sessionStorage.getItem('masters-setting-password')) {
-    authEl('load-title').textContent = 'Приглашение в журнал';
-    authEl('load-description').textContent = 'Регистрация сотрудника';
+    const reset = inviteType === 'recovery';
+    authEl('load-title').textContent = reset ? 'Смена пароля' : 'Приглашение в журнал';
+    authEl('load-description').textContent = reset ? 'Придумайте новый пароль для входа в журнал.' : 'Придумайте пароль — и журнал откроется.';
+    authEl('join-invite').querySelector('p').textContent = reset ? 'Ссылка от администратора для смены пароля.' : 'Задайте пароль для входа в журнал по персональному приглашению.';
+    authEl('join-invite').querySelector('button').textContent = reset ? 'Сохранить новый пароль' : 'Принять приглашение';
     authEl('join-invite').hidden = false;
     return false;
   }
