@@ -1,56 +1,322 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1012">
 <title>Журнал посещаемости Мастеров · СОтворчество</title>
 <meta name="description" content="Журнал посещаемости СОтворчества. Классы, начальная школа и подготовка к ОГЭ и ЕГЭ.">
-<link rel="stylesheet" href="style.css">
 <link rel="icon" type="image/png" href="sotvorchestvo-brics-2026.png">
-<script src="jszip.min.js" defer></script><script src="supabase-2.49.8.js" defer></script><script src="cloud.js" defer></script><script src="manage.js" defer></script><script src="app.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>try{var t=localStorage.getItem('masters-journal-theme');document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');}catch(e){}</script>
+<script src="jszip.min.js" defer></script>
+<script src="supabase-2.49.8.js" defer></script>
+<script src="core.js" defer></script>
+<script src="demo.js" defer></script>
+<script src="cloud.js" defer></script>
+<script src="sync.js" defer></script>
+<script src="excel.js" defer></script>
+<script src="journal.js" defer></script>
+<script src="stats.js" defer></script>
+<script src="curators.js" defer></script>
+<script src="tour.js" defer></script>
+<script src="manage.js" defer></script>
+<script src="app.js" defer></script>
 </head>
 <body>
-<aside class="sidebar">
-  <a class="brand official-brand" href="./" aria-label="СОтворчество — журнал посещаемости Мастеров"><span class="official-logo"><img src="sotvorchestvo-brics-2026.png" alt="СОтворчество · BRICS WBA 2026 · Education &amp; Skill Development · 2nd Runner-Up" width="778" height="152"></span><small>ЖУРНАЛ МАСТЕРОВ</small></a>
-  <div class="year-label">УЧЕБНЫЙ ГОД 2026 / 27</div>
-  <nav aria-label="Раздел журнала">
-    <button class="nav-item active" data-kind="primary"><span>◫</span>Начальная школа</button>
-    <button class="nav-item" data-kind="class"><span>▤</span>Классы 5–11</button>
-    <button class="nav-item" data-kind="exam"><span>◈</span>ОГЭ и ЕГЭ</button>
-  </nav>
-  <div class="side-rule"></div><div class="side-caption" id="group-caption">КЛАССЫ</div>
-  <div id="groups" class="group-list"></div>
-  <div class="sidebar-bottom"><span class="avatar">У</span><div>Рабочий журнал<small>Серверное сохранение</small></div><button id="help-open" aria-label="Как пользоваться">?</button></div>
-</aside>
-<main>
-  <header class="topbar"><div class="breadcrumbs">СОтворчество <span>/</span> Журнал посещаемости Мастеров</div><div class="top-actions"><span class="cloud-label">Журнал сотрудников</span><button class="button" id="manage-open" hidden>Управление</button><button class="button" id="staff-exit" hidden>Выйти</button><button class="button primary" id="export-btn" disabled>↓ Скачать Excel</button></div></header>
-  <section class="workspace">
-    <div class="page-heading"><div><div class="eyebrow">ЖУРНАЛ ПОСЕЩАЕМОСТИ</div><h1 id="page-title">Начальная школа</h1><p id="page-description">Одна отметка на ученика за день</p></div><div class="quarters" aria-label="Выбор четверти"><button data-quarter="II" class="selected">II четверть</button><button data-quarter="III">III четверть</button><button data-quarter="IV">IV четверть</button></div></div>
-    <section class="welcome" id="welcome"><div class="welcome-art" aria-hidden="true"><div class="mini-grid"><span></span><span></span><span></span><span></span><span></span><b>П</b><b>П</b><b>П</b><span></span><b>П</b><i>УП</i><b>П</b><span></span><b>П</b><b>П</b><b>П</b></div><span class="welcome-check">✓</span></div><div class="eyebrow">СОтворчество · ПОСЕЩАЕМОСТЬ</div><h2 id="load-title">Открываем ваш журнал</h2><p id="load-description">Загружаем классы, четверти и отметки.</p><form id="join-invite" class="masters-auth" hidden><p>Задайте пароль для входа в журнал по персональному приглашению.</p><label>Пароль от 10 символов<input name="password" type="password" minlength="10" autocomplete="new-password" required></label><label>Повторите пароль<input type="password" name="repeat" minlength="10" autocomplete="new-password" required></label><button class="button primary">Принять приглашение</button><p id="invite-message" role="status"></p></form><section id="auth-panel" class="masters-auth" hidden>
-<nav class="role-tabs" aria-label="Доступ к журналу"><button type="button" id="tab-login" aria-pressed="true">Вход</button><button type="button" id="tab-register" aria-pressed="false">Регистрация</button></nav>
-<form id="staff-login"><label>Рабочая почта<input type="email" name="email" autocomplete="username" required></label><label>Пароль<input type="password" name="password" autocomplete="current-password" required></label><button class="button primary" type="submit">Войти</button></form>
-<form id="staff-register" hidden><label>Рабочая почта<input type="email" name="email" autocomplete="email" required></label><label>Пароль от 10 символов<input type="password" name="password" minlength="10" autocomplete="new-password" required></label><label>Повторите пароль<input type="password" name="repeat" minlength="10" autocomplete="new-password" required></label><label>Для какой роли нужен доступ<select name="role"><option value="user">Пользователь — ведение посещаемости</option><option value="admin">Администратор — управление журналом</option></select></label><button class="button primary" type="submit">Зарегистрироваться</button></form>
-<p id="auth-message" role="status" aria-live="polite"></p></section><button class="button primary" id="retry-load" hidden>Повторить</button></section>
-    <section class="summary-strip" aria-label="Итоги выбранного дня" hidden><div><span class="stat-symbol mint">✓</span><div><strong id="count-present">—</strong><span>Присутствуют</span></div></div><div><span class="stat-symbol rose">−</span><div><strong id="count-absent">—</strong><span>Отсутствуют</span></div></div><div><span class="stat-symbol sand">!</span><div><strong id="count-notes">—</strong><span>С замечаниями</span></div></div><div class="save-block"><span class="save-dot"></span><div><strong id="save-status">Изменения сохранены</strong><span id="save-detail">в этом браузере</span></div></div></section>
-    <section class="journal-card" hidden>
-      <div class="journal-toolbar"><div class="journal-name"><h2 id="journal-title">Загружаем журнал…</h2><span id="roster-size"></span></div><label class="subject-field"><span class="sr-only">Предмет или группа</span><select id="journal-select"></select></label></div>
-      <div class="calendar-toolbar"><div class="week-control"><button id="prev-week" aria-label="Предыдущая неделя">‹</button><strong id="week-label"></strong><button id="next-week" aria-label="Следующая неделя">›</button><button id="today-btn" class="text-btn">Текущая дата</button><button id="last-filled-btn" class="text-btn">Последние отметки</button></div><label class="search"><span>⌕</span><input id="student-search" placeholder="Найти ученика" aria-label="Найти ученика"></label></div>
-      <div class="table-wrap" id="attendance-wrap"><table id="attendance-table"></table></div>
-      <div class="journal-footer"><div class="legend"><span><i class="dot present"></i>П — присутствовал</span><span><i class="dot absent"></i>УП / НП — пропуск</span><span><i class="dot note"></i>Замечание</span></div><span>Нажмите на ячейку, чтобы изменить отметку</span></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-primary" viewBox="0 0 24 24"><path d="M4 10l8-6 8 6v10H4z"/><path d="M9.5 20v-5.5h5V20"/></symbol>
+  <symbol id="i-class" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M10 10v10"/></symbol>
+  <symbol id="i-exam" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M6 10.5V16c3 2.5 9 2.5 12 0v-5.5"/></symbol>
+  <symbol id="i-stats" viewBox="0 0 24 24"><path d="M4 20V11M10 20V4M16 20v-7M21 20H3"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.2M12 17h.01"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-exit" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3M10 16l-4-4 4-4M6 12h10"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2 18a2 2 0 001.7 3h16.6a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></symbol>
+  <symbol id="logo-full" viewBox="0 0 1812 376"><path style="fill:var(--brand-orange);stroke:none" d="M776.381 252.601C780.838 248.134 784.127 242.623 785.955 236.561C787.917 226.611 786.719 216.291 782.532 207.067C778.344 197.842 771.38 190.183 762.628 185.177C757.714 182.339 752.318 180.449 746.717 179.604H691.703V345.173H748.605C762.135 345.174 775.113 339.764 784.693 330.132C794.272 320.499 799.672 307.43 799.708 293.79C799.755 289.189 799.119 284.607 797.82 280.196C794.187 268.704 786.578 258.91 776.381 252.601ZM760.875 225.414C760.875 227.371 760.49 229.309 759.743 231.116C758.996 232.922 757.902 234.562 756.522 235.939C755.143 237.317 753.507 238.406 751.708 239.142C749.91 239.879 747.984 240.249 746.043 240.231C743.169 240.215 740.36 239.366 737.952 237.784V212.5C740.32 210.832 743.156 209.974 746.043 210.053C747.984 210.035 749.91 210.405 751.708 211.142C753.507 211.878 755.143 212.967 756.522 214.345C757.902 215.722 758.996 217.362 759.743 219.168C760.49 220.975 760.875 222.913 760.875 224.87V225.414ZM749.683 315.811C745.519 315.785 741.449 314.558 737.952 312.277V276.118C739.514 275.071 741.187 274.204 742.941 273.535C745.122 272.833 747.395 272.467 749.683 272.448C755.023 272.877 760.007 275.319 763.641 279.287C767.276 283.254 769.294 288.457 769.294 293.858C769.294 299.258 767.276 304.461 763.641 308.429C760.007 312.396 755.023 314.838 749.683 315.268V315.811Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1634.08 252.601C1638.54 248.134 1641.83 242.623 1643.65 236.561C1645.57 226.613 1644.36 216.308 1640.17 207.093C1635.99 197.877 1629.05 190.214 1620.33 185.177C1615.41 182.339 1610.02 180.449 1604.42 179.604H1549.4V345.173H1606.3C1619.81 345.138 1632.75 339.712 1642.3 330.084C1651.86 320.455 1657.24 307.406 1657.27 293.79C1657.32 289.189 1656.68 284.607 1655.38 280.196C1651.75 268.742 1644.2 258.962 1634.08 252.601ZM1618.44 225.414C1618.44 227.36 1618.06 229.286 1617.32 231.084C1616.58 232.882 1615.5 234.515 1614.13 235.891C1612.77 237.267 1611.15 238.358 1609.37 239.103C1607.58 239.848 1605.67 240.231 1603.74 240.231C1600.87 240.215 1598.06 239.366 1595.65 237.784V212.5C1598.02 210.832 1600.85 209.974 1603.74 210.053C1607.62 210.089 1611.32 211.666 1614.05 214.441C1616.77 217.216 1618.3 220.964 1618.3 224.87L1618.44 225.414ZM1607.38 315.811C1603.22 315.785 1599.15 314.558 1595.65 312.277V276.118C1597.21 275.071 1598.89 274.204 1600.64 273.535C1602.82 272.823 1605.09 272.456 1607.38 272.448C1612.72 272.877 1617.71 275.319 1621.34 279.287C1624.98 283.254 1626.99 288.457 1626.99 293.858C1626.99 299.258 1624.98 304.461 1621.34 308.429C1617.71 312.396 1612.72 314.838 1607.38 315.268V315.811Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1377.89 261.437C1377.87 267 1379.36 272.465 1382.18 277.246C1385 282.027 1389.06 285.946 1393.92 288.583C1398.78 291.221 1404.26 292.479 1409.77 292.223C1415.28 291.967 1420.62 290.206 1425.22 287.128V341.503L1408.9 342.998C1406.34 343.134 1403.78 343.134 1401.22 342.998C1379.76 342.998 1359.18 334.405 1344.01 319.109C1328.84 303.814 1320.32 283.068 1320.32 261.437C1320.32 239.805 1328.84 219.06 1344.01 203.764C1359.18 188.468 1379.76 179.875 1401.22 179.875H1408.9L1425.22 181.506V235.881C1420.63 232.81 1415.3 231.05 1409.8 230.788C1404.3 230.526 1398.83 231.772 1393.98 234.394C1389.12 237.015 1385.06 240.914 1382.23 245.676C1379.4 250.438 1377.9 255.884 1377.89 261.437Z"/><path style="fill:var(--brand-orange);stroke:none" d="M694.938 179.604H583.832V218.889H694.938V179.604Z"/><path style="fill:var(--brand-orange);stroke:none" d="M662.579 215.628H616.195V342.456H662.579V215.628Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1549.4 179.604H1438.3V218.889H1549.4V179.604Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1517.04 215.628H1470.66V342.456H1517.04V215.628Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1018.01 179.605C1016.12 179.472 1014.23 179.472 1012.35 179.605L1003.04 180.421V222.017L1014.91 220.114H1017.88C1020.46 219.892 1023.06 220.214 1025.52 221.06C1027.98 221.905 1030.23 223.256 1032.14 225.026C1034.05 226.795 1035.58 228.946 1036.62 231.341C1037.67 233.737 1038.21 236.325 1038.21 238.941C1038.21 241.557 1037.67 244.145 1036.62 246.54C1035.58 248.936 1034.05 251.087 1032.14 252.856C1030.23 254.626 1027.98 255.977 1025.52 256.822C1023.06 257.668 1020.46 257.99 1017.88 257.768H1014.91L1003.04 255.865V297.325L1012.35 298.277H1018.01C1033.13 297.547 1047.4 290.977 1057.84 279.929C1068.29 268.882 1074.12 254.204 1074.12 238.941C1074.12 223.678 1068.29 209 1057.84 197.953C1047.4 186.905 1033.13 180.335 1018.01 179.605Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1013.42 179.604H966.77V343.27H1013.42V179.604Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1150.15 257.224V298.005H1151.23L1160.53 297.189V255.457L1150.15 257.224Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1196.8 179.604H1150.15V343.27H1196.8V179.604Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1150.15 257.224V298.004C1148.62 298.14 1147.09 298.14 1145.56 298.004C1132.48 297.991 1119.78 293.589 1109.45 285.491C1099.12 277.394 1091.76 266.062 1088.53 253.282C1087.28 248.489 1086.64 243.555 1086.64 238.6V179.74H1127.09V243.358C1127.94 247.638 1130.26 251.48 1133.64 254.213C1137.01 256.946 1141.24 258.397 1145.56 258.311H1148.53L1150.15 257.224Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1259.64 343.136V179.469H1213.25V343.136H1259.64Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1213.26 210.19H1309.93V179.605H1213.26V210.19Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1213.25 273.265H1299.82V249.476H1213.25V273.265Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1213.26 343.272H1309.93V312.687H1213.26V343.272Z"/><path style="fill:var(--brand-orange);stroke:none" d="M932.253 201.762C921.767 191.145 908.389 183.909 893.816 180.974C879.243 178.038 864.133 179.535 850.406 185.275C836.679 191.015 824.953 200.738 816.719 213.209C808.484 225.681 804.112 240.339 804.157 255.321V268.234C803.728 278.439 805.351 288.625 808.929 298.18C812.506 307.735 817.964 316.462 824.974 323.835C831.984 331.208 840.402 337.076 849.72 341.084C859.038 345.092 869.064 347.158 879.194 347.158C889.325 347.158 899.351 345.092 908.669 341.084C917.987 337.076 926.404 331.208 933.414 323.835C940.424 316.462 945.883 307.735 949.46 298.18C953.037 288.625 954.661 278.439 954.231 268.234V255.321C954.251 245.373 952.319 235.52 948.547 226.328C944.775 217.137 939.238 208.788 932.253 201.762ZM910.14 264.428C909.621 272.346 906.135 279.769 900.389 285.193C894.642 290.616 887.066 293.633 879.194 293.633C871.323 293.633 863.746 290.616 858 285.193C852.254 279.769 848.768 272.346 848.249 264.428V259.127C848.768 251.209 852.254 243.786 858 238.362C863.746 232.939 871.323 229.922 879.194 229.922C887.066 229.922 894.642 232.939 900.389 238.362C906.135 243.786 909.621 251.209 910.14 259.127V264.428Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1789.96 201.762C1779.47 191.145 1766.09 183.909 1751.52 180.974C1736.95 178.038 1721.84 179.535 1708.11 185.275C1694.38 191.015 1682.66 200.738 1674.42 213.209C1666.19 225.681 1661.81 240.339 1661.86 255.321V268.234C1661.43 278.439 1663.05 288.625 1666.63 298.18C1670.21 307.735 1675.67 316.462 1682.68 323.835C1689.69 331.208 1698.1 337.076 1707.42 341.084C1716.74 345.092 1726.77 347.158 1736.9 347.158C1747.03 347.158 1757.05 345.092 1766.37 341.084C1775.69 337.076 1784.11 331.208 1791.12 323.835C1798.13 316.462 1803.59 307.735 1807.16 298.18C1810.74 288.625 1812.36 278.439 1811.93 268.234V255.321C1811.95 245.373 1810.02 235.52 1806.25 226.328C1802.48 217.137 1796.94 208.788 1789.96 201.762ZM1767.71 264.428C1767.71 272.684 1764.45 280.602 1758.66 286.44C1752.87 292.278 1745.02 295.558 1736.83 295.558C1728.64 295.558 1720.79 292.278 1715 286.44C1709.21 280.602 1705.95 272.684 1705.95 264.428V259.127C1705.95 250.858 1709.2 242.926 1714.99 237.067C1720.77 231.207 1728.63 227.897 1736.83 227.861C1745.03 227.897 1752.89 231.207 1758.67 237.067C1764.46 242.926 1767.71 250.858 1767.71 259.127V264.428Z"/><path style="fill:var(--brand-orange);stroke:none" d="M238.109 16.2094C228.266 49.3778 218.557 82.5462 208.714 115.579C196.758 113.242 184.398 114.214 172.946 118.391C161.494 122.569 151.378 129.795 143.673 139.304C135.968 148.812 130.962 160.247 129.186 172.393C127.41 184.54 128.931 196.945 133.587 208.29C138.243 219.635 145.86 229.497 155.63 236.827C165.399 244.158 176.956 248.684 189.072 249.925C201.188 251.165 213.412 249.074 224.444 243.873C235.475 238.672 244.904 230.555 251.727 220.385L296.898 331.309L265.076 348.301C260.04 351.022 254.864 353.472 249.57 355.641C178.511 385.275 57.2916 352.107 15.0875 257.496C3.7473 231.64 -1.32361 203.433 0.294234 175.209C1.91208 146.985 10.1722 119.555 24.3913 95.1882C45.9301 62.2443 76.6609 36.4661 112.71 21.1031C120.261 17.9766 126.194 16.0735 128.755 15.2579C164.526 4.87449 202.521 5.2051 238.109 16.2094Z"/><path style="fill:var(--brand-blue);stroke:none" d="M509.536 49.9205C485.972 26.1037 455.925 9.87424 423.203 3.28834C390.481 -3.29757 356.556 0.0564536 325.726 12.9255C294.897 25.7945 268.55 47.5994 250.024 75.5776C231.497 103.556 221.625 136.448 221.658 170.088V199.314C220.75 222.2 224.437 245.035 232.498 266.45C240.559 287.864 252.828 307.416 268.568 323.932C284.309 340.448 303.197 353.589 324.099 362.565C345.001 371.541 367.486 376.168 390.205 376.168C412.924 376.168 435.409 371.541 456.311 362.565C477.213 353.589 496.101 340.448 511.842 323.932C527.582 307.416 539.851 287.864 547.912 266.45C555.973 245.035 559.66 222.2 558.752 199.314V170.088C558.796 147.778 554.471 125.679 546.025 105.058C537.58 84.4375 525.18 65.7 509.536 49.9205ZM393.172 278.837H391.284C369.233 273.673 349.309 261.754 334.248 244.717C317.526 229.731 305.84 209.874 300.808 187.896C300.744 187.036 300.744 186.172 300.808 185.313L337.349 147.93L364.316 206.655L366.743 211.956L371.867 214.267L430.252 241.454L393.172 278.837ZM441.983 229.628L378.474 200.266L349.484 135.968L316.854 64.4657L451.691 126.588C472.186 171.9 492.726 217.212 513.312 262.524L441.983 229.628Z"/></symbol>
+  <symbol id="logo-mark" viewBox="0 0 560 376"><path style="fill:var(--brand-orange);stroke:none" d="M776.381 252.601C780.838 248.134 784.127 242.623 785.955 236.561C787.917 226.611 786.719 216.291 782.532 207.067C778.344 197.842 771.38 190.183 762.628 185.177C757.714 182.339 752.318 180.449 746.717 179.604H691.703V345.173H748.605C762.135 345.174 775.113 339.764 784.693 330.132C794.272 320.499 799.672 307.43 799.708 293.79C799.755 289.189 799.119 284.607 797.82 280.196C794.187 268.704 786.578 258.91 776.381 252.601ZM760.875 225.414C760.875 227.371 760.49 229.309 759.743 231.116C758.996 232.922 757.902 234.562 756.522 235.939C755.143 237.317 753.507 238.406 751.708 239.142C749.91 239.879 747.984 240.249 746.043 240.231C743.169 240.215 740.36 239.366 737.952 237.784V212.5C740.32 210.832 743.156 209.974 746.043 210.053C747.984 210.035 749.91 210.405 751.708 211.142C753.507 211.878 755.143 212.967 756.522 214.345C757.902 215.722 758.996 217.362 759.743 219.168C760.49 220.975 760.875 222.913 760.875 224.87V225.414ZM749.683 315.811C745.519 315.785 741.449 314.558 737.952 312.277V276.118C739.514 275.071 741.187 274.204 742.941 273.535C745.122 272.833 747.395 272.467 749.683 272.448C755.023 272.877 760.007 275.319 763.641 279.287C767.276 283.254 769.294 288.457 769.294 293.858C769.294 299.258 767.276 304.461 763.641 308.429C760.007 312.396 755.023 314.838 749.683 315.268V315.811Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1634.08 252.601C1638.54 248.134 1641.83 242.623 1643.65 236.561C1645.57 226.613 1644.36 216.308 1640.17 207.093C1635.99 197.877 1629.05 190.214 1620.33 185.177C1615.41 182.339 1610.02 180.449 1604.42 179.604H1549.4V345.173H1606.3C1619.81 345.138 1632.75 339.712 1642.3 330.084C1651.86 320.455 1657.24 307.406 1657.27 293.79C1657.32 289.189 1656.68 284.607 1655.38 280.196C1651.75 268.742 1644.2 258.962 1634.08 252.601ZM1618.44 225.414C1618.44 227.36 1618.06 229.286 1617.32 231.084C1616.58 232.882 1615.5 234.515 1614.13 235.891C1612.77 237.267 1611.15 238.358 1609.37 239.103C1607.58 239.848 1605.67 240.231 1603.74 240.231C1600.87 240.215 1598.06 239.366 1595.65 237.784V212.5C1598.02 210.832 1600.85 209.974 1603.74 210.053C1607.62 210.089 1611.32 211.666 1614.05 214.441C1616.77 217.216 1618.3 220.964 1618.3 224.87L1618.44 225.414ZM1607.38 315.811C1603.22 315.785 1599.15 314.558 1595.65 312.277V276.118C1597.21 275.071 1598.89 274.204 1600.64 273.535C1602.82 272.823 1605.09 272.456 1607.38 272.448C1612.72 272.877 1617.71 275.319 1621.34 279.287C1624.98 283.254 1626.99 288.457 1626.99 293.858C1626.99 299.258 1624.98 304.461 1621.34 308.429C1617.71 312.396 1612.72 314.838 1607.38 315.268V315.811Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1377.89 261.437C1377.87 267 1379.36 272.465 1382.18 277.246C1385 282.027 1389.06 285.946 1393.92 288.583C1398.78 291.221 1404.26 292.479 1409.77 292.223C1415.28 291.967 1420.62 290.206 1425.22 287.128V341.503L1408.9 342.998C1406.34 343.134 1403.78 343.134 1401.22 342.998C1379.76 342.998 1359.18 334.405 1344.01 319.109C1328.84 303.814 1320.32 283.068 1320.32 261.437C1320.32 239.805 1328.84 219.06 1344.01 203.764C1359.18 188.468 1379.76 179.875 1401.22 179.875H1408.9L1425.22 181.506V235.881C1420.63 232.81 1415.3 231.05 1409.8 230.788C1404.3 230.526 1398.83 231.772 1393.98 234.394C1389.12 237.015 1385.06 240.914 1382.23 245.676C1379.4 250.438 1377.9 255.884 1377.89 261.437Z"/><path style="fill:var(--brand-orange);stroke:none" d="M694.938 179.604H583.832V218.889H694.938V179.604Z"/><path style="fill:var(--brand-orange);stroke:none" d="M662.579 215.628H616.195V342.456H662.579V215.628Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1549.4 179.604H1438.3V218.889H1549.4V179.604Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1517.04 215.628H1470.66V342.456H1517.04V215.628Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1018.01 179.605C1016.12 179.472 1014.23 179.472 1012.35 179.605L1003.04 180.421V222.017L1014.91 220.114H1017.88C1020.46 219.892 1023.06 220.214 1025.52 221.06C1027.98 221.905 1030.23 223.256 1032.14 225.026C1034.05 226.795 1035.58 228.946 1036.62 231.341C1037.67 233.737 1038.21 236.325 1038.21 238.941C1038.21 241.557 1037.67 244.145 1036.62 246.54C1035.58 248.936 1034.05 251.087 1032.14 252.856C1030.23 254.626 1027.98 255.977 1025.52 256.822C1023.06 257.668 1020.46 257.99 1017.88 257.768H1014.91L1003.04 255.865V297.325L1012.35 298.277H1018.01C1033.13 297.547 1047.4 290.977 1057.84 279.929C1068.29 268.882 1074.12 254.204 1074.12 238.941C1074.12 223.678 1068.29 209 1057.84 197.953C1047.4 186.905 1033.13 180.335 1018.01 179.605Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1013.42 179.604H966.77V343.27H1013.42V179.604Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1150.15 257.224V298.005H1151.23L1160.53 297.189V255.457L1150.15 257.224Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1196.8 179.604H1150.15V343.27H1196.8V179.604Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1150.15 257.224V298.004C1148.62 298.14 1147.09 298.14 1145.56 298.004C1132.48 297.991 1119.78 293.589 1109.45 285.491C1099.12 277.394 1091.76 266.062 1088.53 253.282C1087.28 248.489 1086.64 243.555 1086.64 238.6V179.74H1127.09V243.358C1127.94 247.638 1130.26 251.48 1133.64 254.213C1137.01 256.946 1141.24 258.397 1145.56 258.311H1148.53L1150.15 257.224Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1259.64 343.136V179.469H1213.25V343.136H1259.64Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1213.26 210.19H1309.93V179.605H1213.26V210.19Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1213.25 273.265H1299.82V249.476H1213.25V273.265Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1213.26 343.272H1309.93V312.687H1213.26V343.272Z"/><path style="fill:var(--brand-orange);stroke:none" d="M932.253 201.762C921.767 191.145 908.389 183.909 893.816 180.974C879.243 178.038 864.133 179.535 850.406 185.275C836.679 191.015 824.953 200.738 816.719 213.209C808.484 225.681 804.112 240.339 804.157 255.321V268.234C803.728 278.439 805.351 288.625 808.929 298.18C812.506 307.735 817.964 316.462 824.974 323.835C831.984 331.208 840.402 337.076 849.72 341.084C859.038 345.092 869.064 347.158 879.194 347.158C889.325 347.158 899.351 345.092 908.669 341.084C917.987 337.076 926.404 331.208 933.414 323.835C940.424 316.462 945.883 307.735 949.46 298.18C953.037 288.625 954.661 278.439 954.231 268.234V255.321C954.251 245.373 952.319 235.52 948.547 226.328C944.775 217.137 939.238 208.788 932.253 201.762ZM910.14 264.428C909.621 272.346 906.135 279.769 900.389 285.193C894.642 290.616 887.066 293.633 879.194 293.633C871.323 293.633 863.746 290.616 858 285.193C852.254 279.769 848.768 272.346 848.249 264.428V259.127C848.768 251.209 852.254 243.786 858 238.362C863.746 232.939 871.323 229.922 879.194 229.922C887.066 229.922 894.642 232.939 900.389 238.362C906.135 243.786 909.621 251.209 910.14 259.127V264.428Z"/><path style="fill:var(--brand-orange);stroke:none" d="M1789.96 201.762C1779.47 191.145 1766.09 183.909 1751.52 180.974C1736.95 178.038 1721.84 179.535 1708.11 185.275C1694.38 191.015 1682.66 200.738 1674.42 213.209C1666.19 225.681 1661.81 240.339 1661.86 255.321V268.234C1661.43 278.439 1663.05 288.625 1666.63 298.18C1670.21 307.735 1675.67 316.462 1682.68 323.835C1689.69 331.208 1698.1 337.076 1707.42 341.084C1716.74 345.092 1726.77 347.158 1736.9 347.158C1747.03 347.158 1757.05 345.092 1766.37 341.084C1775.69 337.076 1784.11 331.208 1791.12 323.835C1798.13 316.462 1803.59 307.735 1807.16 298.18C1810.74 288.625 1812.36 278.439 1811.93 268.234V255.321C1811.95 245.373 1810.02 235.52 1806.25 226.328C1802.48 217.137 1796.94 208.788 1789.96 201.762ZM1767.71 264.428C1767.71 272.684 1764.45 280.602 1758.66 286.44C1752.87 292.278 1745.02 295.558 1736.83 295.558C1728.64 295.558 1720.79 292.278 1715 286.44C1709.21 280.602 1705.95 272.684 1705.95 264.428V259.127C1705.95 250.858 1709.2 242.926 1714.99 237.067C1720.77 231.207 1728.63 227.897 1736.83 227.861C1745.03 227.897 1752.89 231.207 1758.67 237.067C1764.46 242.926 1767.71 250.858 1767.71 259.127V264.428Z"/><path style="fill:var(--brand-orange);stroke:none" d="M238.109 16.2094C228.266 49.3778 218.557 82.5462 208.714 115.579C196.758 113.242 184.398 114.214 172.946 118.391C161.494 122.569 151.378 129.795 143.673 139.304C135.968 148.812 130.962 160.247 129.186 172.393C127.41 184.54 128.931 196.945 133.587 208.29C138.243 219.635 145.86 229.497 155.63 236.827C165.399 244.158 176.956 248.684 189.072 249.925C201.188 251.165 213.412 249.074 224.444 243.873C235.475 238.672 244.904 230.555 251.727 220.385L296.898 331.309L265.076 348.301C260.04 351.022 254.864 353.472 249.57 355.641C178.511 385.275 57.2916 352.107 15.0875 257.496C3.7473 231.64 -1.32361 203.433 0.294234 175.209C1.91208 146.985 10.1722 119.555 24.3913 95.1882C45.9301 62.2443 76.6609 36.4661 112.71 21.1031C120.261 17.9766 126.194 16.0735 128.755 15.2579C164.526 4.87449 202.521 5.2051 238.109 16.2094Z"/><path style="fill:var(--brand-blue);stroke:none" d="M509.536 49.9205C485.972 26.1037 455.925 9.87424 423.203 3.28834C390.481 -3.29757 356.556 0.0564536 325.726 12.9255C294.897 25.7945 268.55 47.5994 250.024 75.5776C231.497 103.556 221.625 136.448 221.658 170.088V199.314C220.75 222.2 224.437 245.035 232.498 266.45C240.559 287.864 252.828 307.416 268.568 323.932C284.309 340.448 303.197 353.589 324.099 362.565C345.001 371.541 367.486 376.168 390.205 376.168C412.924 376.168 435.409 371.541 456.311 362.565C477.213 353.589 496.101 340.448 511.842 323.932C527.582 307.416 539.851 287.864 547.912 266.45C555.973 245.035 559.66 222.2 558.752 199.314V170.088C558.796 147.778 554.471 125.679 546.025 105.058C537.58 84.4375 525.18 65.7 509.536 49.9205ZM393.172 278.837H391.284C369.233 273.673 349.309 261.754 334.248 244.717C317.526 229.731 305.84 209.874 300.808 187.896C300.744 187.036 300.744 186.172 300.808 185.313L337.349 147.93L364.316 206.655L366.743 211.956L371.867 214.267L430.252 241.454L393.172 278.837ZM441.983 229.628L378.474 200.266L349.484 135.968L316.854 64.4657L451.691 126.588C472.186 171.9 492.726 217.212 513.312 262.524L441.983 229.628Z"/></symbol>
+  <symbol id="banner" viewBox="0 0 778 152">
+    <rect x="6" y="9" width="766" height="134" rx="67" style="fill:var(--banner-bg);stroke:var(--banner-gold);stroke-width:2"/>
+    <svg x="40" y="32" width="418" height="87" viewBox="0 0 1812 376"><use href="#logo-full"/></svg>
+    <rect x="476" y="34" width="2" height="84" rx="1" style="fill:var(--banner-gold);stroke:none"/>
+    <g style="stroke:none;font-family:'Golos Text','Montserrat',Arial,sans-serif;font-weight:800">
+      <text x="497" y="72" font-size="47" textLength="133" lengthAdjust="spacingAndGlyphs"><tspan style="fill:var(--brics-red)">B</tspan><tspan style="fill:var(--brics-blue)">R</tspan><tspan style="fill:var(--banner-gold-text)">I</tspan><tspan style="fill:var(--brics-red)">C</tspan><tspan style="fill:var(--brics-blue)">S</tspan></text>
+      <text x="498" y="99" font-size="26" textLength="131" lengthAdjust="spacingAndGlyphs"><tspan style="fill:var(--banner-navy)">WBA </tspan><tspan style="fill:var(--banner-gold-text)">2026</tspan></text>
+      <text x="497" y="116" font-size="10.5" font-weight="700" textLength="152" lengthAdjust="spacingAndGlyphs" style="fill:var(--banner-sub)">Education &amp; Skill Development</text>
+    </g>
+    <image x="648" y="25" width="99" height="99" href="data:image/webp;base64,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"/>
+  </symbol>
+  <symbol id="i-parents" viewBox="0 0 24 24"><circle cx="8" cy="7" r="3"/><circle cx="17" cy="9" r="2.3"/><path d="M2.5 20c.6-3.6 2.8-5.5 5.5-5.5s4.9 1.9 5.5 5.5M13.5 15.2c1-.8 2.1-1.2 3.5-1.2 2.3 0 4 1.6 4.5 4.5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+</svg>
+
+<div class="shell">
+  <aside class="sidebar" aria-label="Меню журнала">
+    <a class="brand" href="./" aria-label="СОтворчество · BRICS WBA 2026, 2nd Runner-Up, Education &amp; Skill Development">
+      <svg class="banner" viewBox="0 0 778 152" aria-hidden="true"><use href="#banner"/></svg>
+    </a>
+    <p class="brand-sub">Журнал посещаемости Мастеров · 2026/27</p>
+    <nav class="side-nav" aria-label="Разделы журнала">
+      <p class="side-caption">Журнал</p>
+      <button class="nav-item" data-kind="primary"><svg><use href="#i-primary"/></svg><span>Начальная школа</span></button>
+      <button class="nav-item" data-kind="class"><svg><use href="#i-class"/></svg><span>Классы 5–11</span></button>
+      <button class="nav-item" data-kind="exam"><svg><use href="#i-exam"/></svg><span>ОГЭ и ЕГЭ</span></button>
+      <p class="side-caption">Отчёты</p>
+      <button class="nav-item" data-view-btn="stats"><svg><use href="#i-stats"/></svg><span>Статистика</span></button>
+      <p class="side-caption">Кураторам</p>
+      <button class="nav-item" data-view-btn="curators"><svg><use href="#i-parents"/></svg><span>Работа с родителями</span><b class="badge" data-curator-badge hidden></b></button>
+    </nav>
+    <div class="side-bottom">
+      <button class="nav-item" data-open-help><svg><use href="#i-help"/></svg><span>Как заполнять</span></button>
+      <button class="nav-item" data-theme-toggle><svg class="only-dark"><use href="#i-sun"/></svg><svg class="only-light"><use href="#i-moon"/></svg><span class="only-dark">Светлая тема</span><span class="only-light">Тёмная тема</span></button>
+      <button class="nav-item" data-admin-only data-open-manage hidden><svg><use href="#i-settings"/></svg><span>Управление</span></button>
+      <button class="nav-item" data-exit hidden><svg><use href="#i-exit"/></svg><span>Выйти</span></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <a class="mobile-brand" href="./" aria-label="СОтворчество · BRICS WBA 2026, 2nd Runner-Up"><svg class="banner" viewBox="0 0 778 152" aria-hidden="true"><use href="#banner"/></svg></a>
+      <div class="groups" id="groups" role="group" aria-label="Класс или группа"></div>
+      <div class="top-actions">
+        <span class="sync-pill" data-sync data-state="ok" hidden data-staff-only><i></i><span data-sync-text>Сохранено</span></span>
+        <span class="role-label" id="staff-role"></span>
+        <button class="btn btn-primary" data-export hidden data-staff-only disabled><svg><use href="#i-download"/></svg><span>Скачать Excel</span></button>
+      </div>
+    </header>
+
+    <!-- Загрузка и вход -->
+    <section class="welcome" id="welcome">
+      <svg class="banner welcome-banner" viewBox="0 0 778 152" role="img" aria-label="СОтворчество · BRICS WBA 2026, 2nd Runner-Up"><use href="#banner"/></svg>
+      <p class="eyebrow">Журнал посещаемости Мастеров</p>
+      <h1 id="load-title">Открываем ваш журнал</h1>
+      <p id="load-description" class="muted">Загружаем классы, четверти и отметки.</p>
+      <form id="join-invite" class="auth-form" hidden>
+        <p class="muted">Задайте пароль для входа в журнал по персональному приглашению.</p>
+        <label>Пароль от 10 символов<input name="password" type="password" minlength="10" autocomplete="new-password" required></label>
+        <label>Повторите пароль<input type="password" name="repeat" minlength="10" autocomplete="new-password" required></label>
+        <button class="btn btn-primary btn-wide">Принять приглашение</button>
+        <p id="invite-message" class="form-message" role="status"></p>
+      </form>
+      <section id="auth-panel" class="auth-form" hidden>
+        <div class="segmented" role="group" aria-label="Доступ к журналу">
+          <button type="button" id="tab-login" aria-pressed="true">Вход</button>
+          <button type="button" id="tab-register" aria-pressed="false">Регистрация</button>
+        </div>
+        <form id="staff-login">
+          <label>Рабочая почта<input type="email" name="email" autocomplete="username" required></label>
+          <label>Пароль<input type="password" name="password" autocomplete="current-password" required></label>
+          <button class="btn btn-primary btn-wide" type="submit">Войти</button>
+        </form>
+        <form id="staff-register" hidden>
+          <label>Рабочая почта<input type="email" name="email" autocomplete="email" required></label>
+          <label>Пароль от 10 символов<input type="password" name="password" minlength="10" autocomplete="new-password" required></label>
+          <label>Повторите пароль<input type="password" name="repeat" minlength="10" autocomplete="new-password" required></label>
+          <label>Для какой роли нужен доступ<select name="role"><option value="user">Пользователь — ведение посещаемости</option><option value="admin">Администратор — управление журналом</option></select></label>
+          <button class="btn btn-primary btn-wide" type="submit">Зарегистрироваться</button>
+        </form>
+        <p id="auth-message" class="form-message" role="status" aria-live="polite"></p>
+      </section>
+      <button class="btn btn-primary" id="retry-load" hidden>Повторить</button>
+      <a class="demo-link" href="?demo">Посмотреть демо на вымышленных данных</a>
     </section>
-    <section id="schedule-card" class="schedule-card" hidden><div><h3>Предметы этого класса</h3><p>Подтвердите проведённые уроки выбранного дня. Дневная отметка передаётся в предметные журналы Excel.</p></div><div id="schedule-items"></div></section>
-    <div id="import-summary" class="import-summary" hidden></div>
-    <div class="storage-note"><span>◉</span><p>Отметки сохраняются автоматически на сервере. Для заполнения войдите в учётную запись сотрудника.</p><button class="text-btn" id="help-footer">Как заполнять</button></div>
-    <p id="empty-state" hidden>Для этого выбора журналов пока нет.</p>
+
+    <!-- Журнал -->
+    <section class="view" id="journal-view" hidden>
+      <div class="page-head">
+        <div class="page-title">
+          <p class="eyebrow" id="page-eyebrow"></p>
+          <h1 id="journal-title"></h1>
+          <label class="subject-select" id="subject-field"><span class="sr-only">Предмет</span><select id="journal-select"></select></label>
+        </div>
+        <div class="kpis" id="journal-kpis"></div>
+      </div>
+
+      <div class="card journal-card">
+        <div class="card-toolbar">
+          <div class="week-control">
+            <button class="icon-btn" id="prev-week" aria-label="Предыдущая неделя"><svg><use href="#i-left"/></svg></button>
+            <strong id="week-label"></strong>
+            <button class="icon-btn" id="next-week" aria-label="Следующая неделя"><svg><use href="#i-right"/></svg></button>
+            <button class="text-btn" id="today-btn">Сегодня</button>
+            <button class="text-btn hide-sm" id="last-filled-btn">Последние отметки</button>
+          </div>
+          <div class="toolbar-end">
+            <div class="segmented quarters" role="group" aria-label="Четверть">
+              <button data-quarter="II">II четв.</button><button data-quarter="III">III четв.</button><button data-quarter="IV">IV четв.</button>
+            </div>
+            <label class="search"><svg aria-hidden="true"><use href="#i-search"/></svg><input id="student-search" type="search" placeholder="Найти ученика" aria-label="Найти ученика"></label>
+          </div>
+        </div>
+
+        <!-- Компьютер: неделя -->
+        <div class="table-wrap"><table id="attendance-table"></table></div>
+
+        <!-- Телефон: один день -->
+        <div class="day-mode">
+          <div class="day-strip" id="day-strip" role="group" aria-label="День недели"></div>
+          <div class="day-summary" id="day-summary"></div>
+          <div class="day-list" id="day-list"></div>
+        </div>
+
+        <div class="card-foot">
+          <div class="legend">
+            <span><i class="mk present"></i>П — присутствовал</span>
+            <span><i class="mk excused"></i>УП — уважительный</span>
+            <span><i class="mk absent"></i>НП — неуважительный</span>
+            <span><i class="mk note"></i>оп, вк, тел… — замечания</span>
+          </div>
+          <span class="muted hide-sm">Нажмите на ячейку, чтобы изменить отметку · на имя — карточка ученика</span>
+        </div>
+      </div>
+
+      <section id="schedule-card" class="card schedule-card" hidden>
+        <div>
+          <h3>Предметы этого дня</h3>
+          <p class="muted">Подтвердите проведённые уроки. Дневная отметка передаётся в предметные журналы.</p>
+        </div>
+        <div id="schedule-items" class="schedule-items"></div>
+      </section>
+      <p id="import-summary" class="footnote" hidden></p>
+    </section>
+
+    <!-- Статистика -->
+    <section class="view" id="stats-view" hidden></section>
+
+    <!-- Работа кураторов с родителями -->
+    <section class="view" id="curators-view" hidden></section>
+
+    <p id="empty-state" class="empty" hidden>Для этого выбора журналов пока нет.</p>
+  </main>
+</div>
+
+<!-- Нижняя навигация на телефоне -->
+<nav class="bottom-nav" aria-label="Разделы" data-staff-only hidden>
+  <button data-view-btn="journal"><svg><use href="#i-class"/></svg><span>Журнал</span></button>
+  <button data-view-btn="stats"><svg><use href="#i-stats"/></svg><span>Статистика</span></button>
+  <button data-view-btn="curators"><span class="nav-icon"><svg><use href="#i-parents"/></svg><b class="badge" data-curator-badge hidden></b></span><span>Родители</span></button>
+  <button data-open-picker><svg><use href="#i-layers"/></svg><span>Раздел</span></button>
+  <button data-open-more><svg><use href="#i-menu"/></svg><span>Ещё</span></button>
+</nav>
+
+<!-- Отметка -->
+<dialog id="mark-dialog" class="sheet">
+  <form method="dialog">
+    <header class="sheet-head">
+      <div><h3 id="mark-name"></h3><p id="mark-date" class="muted"></p></div>
+      <button class="icon-btn" aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+    </header>
+    <div class="mark-options" id="mark-options"></div>
+    <label class="field">Своя отметка<input id="custom-mark" maxlength="120" placeholder="Например, У-50 мин или оп; вк"></label>
+    <div class="sheet-actions">
+      <button type="button" class="btn" id="reset-mark">Вернуть исходную</button>
+      <button type="button" class="btn btn-primary" id="apply-mark">Сохранить</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Карточка ученика -->
+<dialog id="student-dialog" class="sheet side-sheet" aria-labelledby="student-name">
+  <div class="sheet-head">
+    <div class="student-head"><span class="avatar lg" id="student-avatar"></span><div><h3 id="student-name"></h3><p class="muted" id="student-meta"></p></div></div>
+    <button class="icon-btn" id="student-close" aria-label="Закрыть"><svg><use href="#i-close"/></svg></button>
+  </div>
+  <div id="student-body"></div>
+</dialog>
+
+<!-- Выбор раздела и четверти (телефон) -->
+<dialog id="picker-dialog" class="sheet">
+  <form method="dialog">
+    <header class="sheet-head"><h3>Раздел журнала</h3><button class="icon-btn" aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></header>
+    <div class="picker-list">
+      <button data-kind="primary" value="primary"><svg><use href="#i-primary"/></svg>Начальная школа</button>
+      <button data-kind="class" value="class"><svg><use href="#i-class"/></svg>Классы 5–11</button>
+      <button data-kind="exam" value="exam"><svg><use href="#i-exam"/></svg>ОГЭ и ЕГЭ</button>
+    </div>
+    <p class="eyebrow">Четверть</p>
+    <div class="segmented quarters wide" role="group" aria-label="Четверть">
+      <button type="button" data-quarter="II">II</button><button type="button" data-quarter="III">III</button><button type="button" data-quarter="IV">IV</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Ещё (телефон) -->
+<dialog id="more-dialog" class="sheet">
+  <form method="dialog">
+    <header class="sheet-head"><div><h3>Ещё</h3><p class="muted" id="more-role"></p></div><button class="icon-btn" aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></header>
+    <div class="picker-list">
+      <button type="button" data-theme-toggle><svg class="only-dark"><use href="#i-sun"/></svg><svg class="only-light"><use href="#i-moon"/></svg><span class="only-dark">Светлая тема</span><span class="only-light">Тёмная тема</span></button>
+      <button type="button" data-export><svg><use href="#i-download"/></svg>Скачать Excel</button>
+      <button type="button" data-open-help><svg><use href="#i-help"/></svg>Как заполнять журнал</button>
+      <button type="button" data-start-tour><svg><use href="#i-layers"/></svg>Пройти обучение</button>
+      <button type="button" data-admin-only data-open-manage hidden><svg><use href="#i-settings"/></svg>Управление журналом</button>
+      <button type="button" data-exit hidden><svg><use href="#i-exit"/></svg>Выйти</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Справка -->
+<dialog id="help-dialog" class="sheet">
+  <form method="dialog">
+    <header class="sheet-head"><h3>Как заполнять журнал</h3><button class="icon-btn" aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></header>
+    <button type="button" class="btn btn-accent btn-wide tour-again" data-start-tour><svg><use href="#i-help"/></svg>Пройти обучение заново — со стрелками и подсказками</button>
+    <ol class="help-list">
+      <li>Выберите раздел, четверть и класс или экзаменационную группу. Списки и прежние отметки уже внутри приложения.</li>
+      <li>Над датой нажмите «Подтвердить» — у всех учеников появится «П».</li>
+      <li>Нажмите на ячейку отсутствующего ученика и выберите УП или НП. Замечания выбираются там же. Ошиблись — нажмите «Отменить» во всплывающем сообщении.</li>
+      <li>В начальной школе отметка вводится один раз за день. Ниже подтвердите проведённые предметы. В списке предметов можно перейти к предмету и отметить исключение.</li>
+      <li>УП — уважительный пропуск, НП — неуважительный. оп — опоздал, вк — камера выключена, пвк — выключал камеру, У — ушёл, тел — с телефона, молчит — не отвечал.</li>
+      <li>Нажмите на имя ученика, чтобы открыть его карточку: посещаемость по всем предметам и последние пропуски.</li>
+      <li>Раздел «Работа с родителями» для кураторов: каждую неделю туда попадают ученики с низкой посещаемостью или частыми замечаниями. Отметьте, связались ли вы с родителями и о чём договорились.</li>
+      <li>Следите за индикатором «Сохранено». При потере связи изменения остаются в очереди и отправляются после восстановления.</li>
+      <li>«Скачать Excel» выгружает исходную книгу с текущими отметками. Отчёты по статистике выгружаются в разделе «Статистика».</li>
+    </ol>
+  </form>
+</dialog>
+
+<!-- Управление -->
+<dialog id="admin-panel" class="sheet wide-sheet" aria-labelledby="admin-title">
+  <header class="sheet-head"><h3 id="admin-title">Управление журналом</h3><button type="button" class="icon-btn" id="admin-close" aria-label="Закрыть"><svg><use href="#i-close"/></svg></button></header>
+  <div class="segmented" role="group" aria-label="Разделы управления">
+    <button data-panel="roster" aria-pressed="true">Ученики</button><button data-panel="accounts" aria-pressed="false">Сотрудники</button><button data-panel="audit" aria-pressed="false">История</button>
+  </div>
+  <p id="admin-message" class="form-message" role="status" aria-live="polite"></p>
+  <section data-view="roster">
+    <label class="field">Класс или экзаменационная группа<select id="manage-group"></select></label>
+    <p class="muted small">Изменения применяются ко всем листам выбранного класса или группы за II–IV четверти. Отметки выбывшего ученика сохраняются в архиве.</p>
+    <form id="student-add" class="control-row"><label class="field">Фамилия и имя ученика<input name="name" placeholder="Например, Иванова Мария" maxlength="150" minlength="2" required></label><button class="btn btn-primary">Добавить</button></form>
+    <div class="control-row"><label class="field">Найти ученика<input id="roster-filter" type="search"></label><label class="field">Список<select id="roster-mode"><option value="active">Ученики класса</option><option value="archive">Архив</option></select></label></div>
+    <div id="manage-students" class="manage-list"></div>
   </section>
-</main>
-<dialog id="mark-dialog"><form method="dialog"><header><div><h3 id="mark-name"></h3><p id="mark-date"></p></div><button class="icon-button" aria-label="Закрыть">×</button></header><div class="mark-options" id="mark-options"></div><label class="comment-label">Своя отметка<input id="custom-mark" maxlength="120" placeholder="Например, У-50 мин или оп; вк"></label><div class="dialog-actions"><button type="button" class="button" id="reset-mark">Вернуть исходную отметку</button><button type="button" class="button primary" id="apply-mark">Сохранить</button></div></form></dialog>
-<dialog id="help-dialog"><form method="dialog"><header><h3>Как заполнять журнал</h3><button class="icon-button" aria-label="Закрыть">×</button></header><ol><li>Выберите четверть, раздел и класс или экзаменационную группу. Списки и прежние отметки уже внутри приложения.</li><li>В строке над датой нажмите «Подтвердить». Появится «П» у всех учеников.</li><li>Нажмите на ячейку отсутствующего ученика и выберите УП или НП. Замечания выбираются там же.</li><li>В началке отметка вводится один раз за день. Ниже подтвердите проведённые предметы. Через список «Общий день» можно перейти к предмету и отметить исключение.</li><li>УП — уважительный пропуск, НП — неуважительный. оп — опоздал, вк — камера выключена, пвк — выключал камеру, У — ушёл, тел — с телефона, молчит — не отвечал.</li><li>Дождитесь надписи «Сохранено на сервере». При потере соединения изменения остаются в очереди и отправляются после восстановления связи.</li><li>Кнопка «Скачать Excel» выгружает исходную книгу с текущими отметками.</li></ol><p class="help-note">Списки и отметки доступны сотрудникам после входа.</p></form></dialog>
-<dialog id="admin-panel" aria-labelledby="admin-title"><header><h2 id="admin-title">Управление журналом</h2><button type="button" class="icon-button" id="admin-close" aria-label="Закрыть">×</button></header>
-<nav class="role-tabs admin-nav" aria-label="Разделы управления"><button data-panel="roster" aria-pressed="true">Ученики</button><button data-panel="accounts" aria-pressed="false">Сотрудники</button><button data-panel="audit" aria-pressed="false">История</button></nav>
-<p id="admin-message" role="status" aria-live="polite"></p>
-<section data-view="roster"><label>Класс или экзаменационная группа<select id="manage-group"></select></label><p>Изменения применяются ко всем листам выбранного класса или группы за II–IV четверти. Отметки выбывшего ученика сохраняются в архиве.</p>
-<form id="student-add" class="control-row"><label>Имя и фамилия ученика<input name="name" maxlength="150" minlength="2" required></label><button class="button primary">Добавить</button></form>
-<div class="control-row"><label>Найти ученика<input id="roster-filter" type="search"></label><label>Список<select id="roster-mode"><option value="active">Ученики класса</option><option value="archive">Архив</option></select></label></div><div id="manage-students" class="manage-list"></div></section>
-<section data-view="accounts" hidden><p>Одобрите заявку и назначьте роль. Закрытие доступа отключает работу с данными журнала.</p><form id="issue-invite" class="control-row"><label>Пригласить сотрудника по почте<input name="email" type="email" required placeholder="name@example.ru"></label><button class="button">Создать персональную ссылку</button></form><div id="issued-invite" hidden><label>Передайте ссылку лично этому сотруднику<input id="invite-url" type="text" readonly></label><button type="button" id="invite-copy" class="button">Скопировать</button></div><div id="manage-accounts" class="manage-list"></div></section>
-<section data-view="audit" hidden><form id="history-filter" class="control-row"><label>Сотрудник<input id="actor-filter" type="search" placeholder="Почта или часть имени"></label><label>Действие<select id="action-filter"><option value="">Все действия</option><option value="mark">Отметки</option><option value="add">Добавление ученика</option><option value="archive">Архивирование</option><option value="restore">Восстановление</option><option value="registration">Регистрация</option><option value="access">Изменение доступа</option><option value="invite">Приглашения</option><option value="legacy">До переноса</option></select></label><button class="button">Показать</button></form><div id="manage-history" class="manage-list"></div><button type="button" id="history-next" class="button" hidden>Показать ещё</button></section></dialog><div id="toast" role="status"></div>
-</body></html>
+  <section data-view="accounts" hidden>
+    <p class="muted small">Одобрите заявку и назначьте роль. Закрытие доступа отключает работу с данными журнала.</p>
+    <form id="issue-invite" class="control-row"><label class="field">Пригласить сотрудника по почте<input name="email" type="email" required placeholder="name@example.ru"></label><button class="btn">Создать ссылку</button></form>
+    <div id="issued-invite" class="control-row" hidden><label class="field">Передайте ссылку лично этому сотруднику<input id="invite-url" type="text" readonly></label><button type="button" id="invite-copy" class="btn">Скопировать</button></div>
+    <div id="manage-accounts" class="manage-list"></div>
+  </section>
+  <section data-view="audit" hidden>
+    <form id="history-filter" class="control-row">
+      <label class="field">Сотрудник<input id="actor-filter" type="search" placeholder="Почта или часть имени"></label>
+      <label class="field">Действие<select id="action-filter"><option value="">Все действия</option><option value="mark">Отметки</option><option value="add">Добавление ученика</option><option value="archive">Архивирование</option><option value="restore">Восстановление</option><option value="registration">Регистрация</option><option value="access">Изменение доступа</option><option value="invite">Приглашения</option><option value="legacy">До переноса</option></select></label>
+      <button class="btn">Показать</button>
+    </form>
+    <div id="manage-history" class="manage-list"></div>
+    <button type="button" id="history-next" class="btn" hidden>Показать ещё</button>
+  </section>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
